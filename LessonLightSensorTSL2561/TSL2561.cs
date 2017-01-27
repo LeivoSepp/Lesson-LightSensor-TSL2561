@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading.Tasks;
+using Windows.Devices.Enumeration;
 using Windows.Devices.I2c;
 
 namespace LessonLightSensorTSL2561
@@ -24,35 +26,59 @@ namespace LessonLightSensorTSL2561
 
         // I2C Device
         private I2cDevice I2C;
-
-        public TSL2561(ref I2cDevice I2CDevice)
+        private int I2C_ADDRESS { get; set; } = TSL2561_ADDR;
+        public TSL2561(int i2cAddress = TSL2561_ADDR)
         {
-            this.I2C = I2CDevice;
+            I2C_ADDRESS = i2cAddress;
         }
+        public static bool IsInitialised { get; private set; } = false;
+        private void Initialise()
+        {
+            if (!IsInitialised)
+            {
+                EnsureInitializedAsync().Wait();
+            }
+        }
+        private async Task EnsureInitializedAsync()
+        {
+            if (IsInitialised) { return; }
+            try
+            {
+                var settings = new I2cConnectionSettings(I2C_ADDRESS);
+                settings.BusSpeed = I2cBusSpeed.FastMode;
+                settings.SharingMode = I2cSharingMode.Shared;
+                string aqs = I2cDevice.GetDeviceSelector("I2C1");         /* Find the selector string for the I2C bus controller */
+                var dis = await DeviceInformation.FindAllAsync(aqs);      /* Find the I2C bus controller device with our selector string           */
+                I2C = await I2cDevice.FromIdAsync(dis[0].Id, settings);   /* Create an I2cDevice with our selected bus controller and I2C settings */
 
+                PowerUp();
+                IsInitialised = true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("I2C Initialization Failed", ex);
+            }
+        }
         // TSL2561 Sensor Power up
-        public void PowerUp()
+        private void PowerUp()
         {
             write8(TSL2561_REG_CONTROL, 0x03);
         }
-
         // TSL2561 Sensor Power down
         public void PowerDown()
         {
             write8(TSL2561_REG_CONTROL, 0x00);
         }
-
         // Retrieve TSL ID
         public byte GetId()
         {
             return I2CRead8(TSL2561_REG_ID);
         }
-
         // Set TSL2561 Timing and return the MS
         public int SetTiming(Boolean gain, byte time)
         {
+            Initialise();
             int ms = 0;
-
             switch (time)
             {
                 case 0: ms = 14; break;
@@ -60,9 +86,7 @@ namespace LessonLightSensorTSL2561
                 case 2: ms = 402; break;
                 default: ms = 0; break;
             }
-
             int timing = I2CRead8(TSL2561_REG_TIMING);
-
             // Set gain (0 or 1) 
             if (gain)
                 timing |= 0x10;
@@ -70,41 +94,38 @@ namespace LessonLightSensorTSL2561
                 timing &= (~0x10);
 
             // Set integration time (0 to 3) 
-
             timing &= ~0x03;
             timing |= (time & 0x03);
 
             write8(TSL2561_REG_TIMING, (byte)timing);
-
             return ms;
         }
-
         // Get channel data
-        public uint[] GetData()
+        private uint[] GetData()
         {
             uint[] Data = new uint[2];
-
             Data[0] = I2CRead16(TSL2561_REG_DATA_0);
             Data[1] = I2CRead16(TSL2561_REG_DATA_1);
-
             return Data;
         }
 
         // Calculate Lux
-        public double GetLux(Boolean gain, uint ms, uint CH0, uint CH1)
+        public double GetLux(Boolean gain, uint ms)
         {
+            Initialise();
+            uint[] Data = GetData();
+            uint CH0 = Data[0];
+            uint CH1 = Data[1];
+
             double ratio, d0, d1;
             double lux = 0.0;
 
             // Determine if either sensor saturated (0xFFFF)
-            // If so, abandon ship (calculation will not be accurate)
             if ((CH0 == 0xFFFF) || (CH1 == 0xFFFF))
             {
                 lux = 0.0;
-
                 return lux;
             }
-
             // Convert from unsigned integer to floating point
             d0 = CH0; d1 = CH1;
 
@@ -121,33 +142,20 @@ namespace LessonLightSensorTSL2561
                 d0 *= 16;
                 d1 *= 16;
             }
-
             // Determine lux per datasheet equations:
-
             if (ratio < 0.5)
-            {
                 lux = 0.0304 * d0 - 0.062 * d0 * Math.Pow(ratio, 1.4);
-            }
             else if (ratio < 0.61)
-            {
                 lux = 0.0224 * d0 - 0.031 * d1;
-            }
             else if (ratio < 0.80)
-            {
                 lux = 0.0128 * d0 - 0.0153 * d1;
-            }
             else if (ratio < 1.30)
-            {
                 lux = 0.00146 * d0 - 0.00112 * d1;
-            }
             else
-            {
                 lux = 0.0;
-            }
 
             return lux;
         }
-
         // Write byte
         private void write8(byte addr, byte cmd)
         {
@@ -155,7 +163,6 @@ namespace LessonLightSensorTSL2561
 
             I2C.Write(Command);
         }
-
         // Read byte
         private byte I2CRead8(byte addr)
         {
@@ -166,7 +173,6 @@ namespace LessonLightSensorTSL2561
 
             return data[0];
         }
-
         // Read integer
         private ushort I2CRead16(byte addr)
         {
