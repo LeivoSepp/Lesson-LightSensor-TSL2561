@@ -5,11 +5,11 @@ namespace LessonLightSensorTSL2561
 {
     public sealed class StartupTask : IBackgroundTask
     {
-        //TSL2561 sensor
         private TSL2561 TSL2561Sensor = new TSL2561();
-
+        
         public void Run(IBackgroundTaskInstance taskInstance)
         {
+            TSL2561Sensor.SetTiming(true, TSL2561.INTEGRATIONTIME_402MS);
             while (true)
             {
                 double currentLux = TSL2561Sensor.GetLux();
