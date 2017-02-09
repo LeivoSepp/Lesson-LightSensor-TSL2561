@@ -8,10 +8,10 @@ namespace LessonLightSensorTSL2561
     class TSL2561
     {
         // TSL Address Constants
-        public const int TSL2561_ADDR_0 = 0x29;    // address with '0' shorted on board 
-        public const int TSL2561_ADDR = 0x39;      // default address 
-        public const int TSL2561_ADDR_1 = 0x49;    // address with '1' shorted on board 
-        // TSL Commands
+        public const int I2C_ADDR_0_0x29 = 0x29;    // address with '0' shorted on board 
+        public const int I2C_ADDR_0x39 = 0x39;      // default address 
+        public const int I2C_ADDR_1_0x49 = 0x49;    // address with '1' shorted on board 
+
         private const int TSL2561_CMD = 0x80;
         private const int TSL2561_CMD_CLEAR = 0xC0;
         // TSL Registers
@@ -24,12 +24,25 @@ namespace LessonLightSensorTSL2561
         private const int TSL2561_REG_DATA_0 = 0x0C;
         private const int TSL2561_REG_DATA_1 = 0x0E;
 
-        // I2C Device
+        //public const int TSL2561_GAIN_1X = 0x00;
+        //public const int TSL2561_GAIN_16X = 0x10;
+
+        public const int INTEGRATIONTIME_13MS = 0x00;
+        public const int INTEGRATIONTIME_101MS = 0x01;
+        public const int INTEGRATIONTIME_402MS = 0x02;
+
+        //default values
+        private const bool gainDefault = false;
+        private const int integrationTimeDefault = INTEGRATIONTIME_101MS;
+
         private I2cDevice I2C;
-        private int I2C_ADDRESS { get; set; } = TSL2561_ADDR;
-        public TSL2561(int i2cAddress = TSL2561_ADDR)
+        private int I2C_ADDRESS { get; set; } = I2C_ADDR_0x39;
+        private uint MS { get; set; } = 101;
+        private bool gainSet { get; set; } = gainDefault;
+        public TSL2561(int i2cAddress = I2C_ADDR_0x39)
         {
             I2C_ADDRESS = i2cAddress;
+            Initialise();
         }
         public static bool IsInitialised { get; private set; } = false;
         private void Initialise()
@@ -52,6 +65,7 @@ namespace LessonLightSensorTSL2561
                 I2C = await I2cDevice.FromIdAsync(dis[0].Id, settings);   /* Create an I2cDevice with our selected bus controller and I2C settings */
 
                 PowerUp();
+                SetTiming();
                 IsInitialised = true;
             }
             catch (Exception ex)
@@ -65,7 +79,7 @@ namespace LessonLightSensorTSL2561
             write8(TSL2561_REG_CONTROL, 0x03);
         }
         // TSL2561 Sensor Power down
-        public void PowerDown()
+        private void PowerDown()
         {
             write8(TSL2561_REG_CONTROL, 0x00);
         }
@@ -74,17 +88,21 @@ namespace LessonLightSensorTSL2561
         {
             return I2CRead8(TSL2561_REG_ID);
         }
-        // Set TSL2561 Timing and return the MS
-        public int SetTiming(Boolean gain, byte time)
+        public void SetTiming(Boolean gain = gainDefault, byte integrationTime = integrationTimeDefault)
         {
-            Initialise();
+            gainSet = gain;
+            MS = (uint)setTiming(gain, integrationTime);
+        }
+        // Set TSL2561 Timing and return the MS
+        private int setTiming(Boolean gain = gainDefault, byte integrationTime = integrationTimeDefault)
+        {
             int ms = 0;
-            switch (time)
+            switch (integrationTime)
             {
-                case 0: ms = 14; break;
-                case 1: ms = 101; break;
-                case 2: ms = 402; break;
-                default: ms = 0; break;
+                case INTEGRATIONTIME_13MS: ms = 14; break;
+                case INTEGRATIONTIME_101MS: ms = 101; break;
+                case INTEGRATIONTIME_402MS: ms = 402; break;
+                default: ms = 101; break;
             }
             int timing = I2CRead8(TSL2561_REG_TIMING);
             // Set gain (0 or 1) 
@@ -95,7 +113,7 @@ namespace LessonLightSensorTSL2561
 
             // Set integration time (0 to 3) 
             timing &= ~0x03;
-            timing |= (time & 0x03);
+            timing |= (integrationTime & 0x03);
 
             write8(TSL2561_REG_TIMING, (byte)timing);
             return ms;
@@ -110,8 +128,11 @@ namespace LessonLightSensorTSL2561
         }
 
         // Calculate Lux
-        public double GetLux(Boolean gain, uint ms)
+        public double GetLux()
         {
+            bool gain = gainSet;
+            uint ms = MS;
+
             Initialise();
             uint[] Data = GetData();
             uint CH0 = Data[0];
@@ -154,7 +175,7 @@ namespace LessonLightSensorTSL2561
             else
                 lux = 0.0;
 
-            return lux;
+            return Math.Round(lux, 2);
         }
         // Write byte
         private void write8(byte addr, byte cmd)
@@ -184,5 +205,4 @@ namespace LessonLightSensorTSL2561
             return (ushort)((data[1] << 8) | (data[0]));
         }
     }
-
 }
