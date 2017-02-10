@@ -10,10 +10,10 @@ different gain/timing ranges to detect light ranges from up to 0.1 - 40,000+ Lux
 
 ![image](https://cloud.githubusercontent.com/assets/13704023/22796235/531f5dec-ef02-11e6-929a-beb24afb5d74.png)
 
-## How to connect sensor into Raspberry PI?
-To connect this sensor to Raspberry PI you need 4 wires. Two of the wires used for voltage (+3V from Raspberry) and ground and remaining two are used for data. 
+## How to connect this sensor into Raspberry PI?
+To connect this sensor to Raspberry PI you need 4 wires. Two of the wires used for voltage Vin (+3V from Raspberry) and ground GND and remaining two are used for data. 
 As this is digital sensor, it uses I2C protocol to communicate with Raspberry. For I2C we need just two wires, Data (SDA) and Clock (SCL).
-Please connect sensor SDA and SCL pins accordingly to Raspberry SDA and SCL pins. 
+Connect sensor SDA and SCL pins accordingly to Raspberry SDA and SCL pins. 
 
 ## How do I write code?
 I made it very simple for you. You just need to add NuGet package RobootikaCOM.TSL2561 to your project and the you are almost done :)
@@ -97,8 +97,30 @@ For example, setting gain:true and timing maximum (402ms), this is the scenario 
             }
         }
 ````
+## Advanced sensor tuning: change I2C address
+I2C address is used to communicate with the sensor. Many sensors have I2C address hardcoded, but this sensor supports three different I2C addresses.
+By defult this TSL2561 sensor uses I2C address 0x39. You can change the address by connecting sensor pin named Addr to +3v or to ground. 
 
-### Sensor technical Details
+1. How to set I2C address to 0x39
+   1. Leave sensor pin addr open
+   2. Create new sensor object without any parameter
+````C#
+        private TSL2561 TSL2561Sensor = new TSL2561();
+````
+2. How to set I2C address to 0x29
+   1. Connect sensor pin addr to ground
+   2. Use parameter TSL2561.I2C_ADDR_0_0x29 when creating new sensor object
+````C#
+        private TSL2561 TSL2561Sensor = new TSL2561(TSL2561.I2C_ADDR_0_0x29);
+````
+3. How to set I2C address to 0x49
+   1. Connect sensor pin addr to voltage +3V
+   2. Use parameter TSL2561.I2C_ADDR_0_0x49 when creating new sensor object
+````C#
+        private TSL2561 TSL2561Sensor = new TSL2561(TSL2561.I2C_ADDR_1_0x49);
+````
+
+## Sensor technical Details
 
 * Precisely Measures Illuminance in Diverse Lighting Conditions 
 * Temperature range: -30 to 80 *C
