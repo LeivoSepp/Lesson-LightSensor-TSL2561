@@ -128,6 +128,7 @@ By defult this TSL2561 sensor uses I2C address 0x39. You can change the address 
 * Interface: I2C
 * This board/chip uses I2C 7-bit addresses 0x39, 0x29, 0x49, selectable with jumpers
 
+## Indoor and outdoor lighting conditions
 
 Illuminance | Example
 --- | --- 
