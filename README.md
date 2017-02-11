@@ -15,6 +15,8 @@ To connect this sensor to Raspberry PI you need 4 wires. Two of the wires used f
 As this is digital sensor, it uses I2C protocol to communicate with the Raspberry. For I2C we need two wires, Data (SDA) and Clock (SCL).
 Connect sensor SDA and SCL pins accordingly to Raspberry SDA and SCL pins. 
 
+![image](https://cloud.githubusercontent.com/assets/13704023/22856371/b48a39f2-f098-11e6-9488-9c99df0769ae.png)
+
 ## How do I write the code?
 I made it very simple for you. You just need to add NuGet package RobootikaCOM.TSL2561 to your project and you are almost done :)
 
