@@ -1,10 +1,10 @@
 # Adafruit Light Sensor TSL2561
-This project as an example, how to use Adafruit light sensor TSL2561 in Raspberry PI and Windows 10 IoT Core.
+This project is an example on how to use the Adafruit light sensor TSL2561 in Raspberry PI and Windows 10 IoT Core.
 
 ## What is this sensor?
 https://www.adafruit.com/products/439
 
-The TSL2561 luminosity sensor is an advanced digital light sensor, ideal for use in a wide range of light situations. 
+The TSL2561 luminosity sensor is an advanced digital light sensor, ideal for use in a wide range of light situations.
 This sensor is precise, allowing for exact lux calculations and can be configured for 
 different gain/timing ranges to detect light ranges from up to 0.1 - 40,000+ Lux on the fly. 
 
@@ -12,11 +12,11 @@ different gain/timing ranges to detect light ranges from up to 0.1 - 40,000+ Lux
 
 ## How to connect this sensor into Raspberry PI?
 To connect this sensor to Raspberry PI you need 4 wires. Two of the wires used for voltage Vin (+3V from Raspberry) and ground GND and remaining two are used for data. 
-As this is digital sensor, it uses I2C protocol to communicate with Raspberry. For I2C we need just two wires, Data (SDA) and Clock (SCL).
+As this is digital sensor, it uses I2C protocol to communicate with the Raspberry. For I2C we need two wires, Data (SDA) and Clock (SCL).
 Connect sensor SDA and SCL pins accordingly to Raspberry SDA and SCL pins. 
 
-## How do I write code?
-I made it very simple for you. You just need to add NuGet package RobootikaCOM.TSL2561 to your project and the you are almost done :)
+## How do I write the code?
+I made it very simple for you. You just need to add NuGet package RobootikaCOM.TSL2561 to your project and you are almost done :)
 
 Right-click in your project name and then "Manage NuGet packages"
 ![image](https://cloud.githubusercontent.com/assets/13704023/22802711/964f83d6-ef1a-11e6-9e7e-398257c2eda0.png)
@@ -31,7 +31,7 @@ After adding this NuGet package, you just need to write 2 lines of code.
         private TSL2561 TSL2561Sensor = new TSL2561();
 ````
 
-2. Write a while-loop, to read data from the sensor in every 1 sec.
+2. Write a while-loop, to read data from the sensor every 1 sec.
 ````C#
             while (true)
             {
@@ -40,9 +40,9 @@ After adding this NuGet package, you just need to write 2 lines of code.
             }
 ````
 
-Final code look like this. 
+Final code looks like this. 
 If you run it, you do not see anything, because it just reads the data, but it doesnt show it anywhere.
-You need to integrate this project with my other example, where I am teaching how to send this data into Azure.
+You need to integrate this project with my other example, where I teach how to send this data into Azure.
 
 ````C#
 using Windows.ApplicationModel.Background;
@@ -67,12 +67,12 @@ namespace LessonLightSensorTSL2561
 ````
 
 ## Advanced sensor tuning: timing and gain
-This sensor support three different timing and two gain options. 
+This sensor supports three different timing and two gain options. 
 
-1. Timing: this mean how many samples sensor will take before calculating light. 
+1. Timing: this means how many samples the sensor will take before calculating the light level.
 Changing the integration time gives you a longer time over which to sense light. Longer timelines are slower, but are good in very low light situtations!
 This sensor has three parameters for timing. 
-   1. 13ms shortest measure time, use in bright light
+   1. 13ms the shortest measure time, use in bright light
    2. 101ms average measure time, use in medium light
    3. 402ms long measure time, use in dim light
 ````C#
@@ -84,7 +84,7 @@ TSL2561.INTEGRATIONTIME_402MS
    1. No gain (false): use in bright light
    2. 16x Gain (true): use in dim light
 
-Tu use timing and gain, you need to write one additional ine of code. First parameter for method SetTiming is gain (true/false) and second parameter is timing. 
+Tu use timing and gain, you need to write one additional line of code. First parameter for method SetTiming is gain (true/false) and second parameter is timing. 
 For example, setting gain:true and timing maximum (402ms), this is the scenario for the most darker situation.
 ````C#
        public void Run(IBackgroundTaskInstance taskInstance)
@@ -99,23 +99,23 @@ For example, setting gain:true and timing maximum (402ms), this is the scenario 
 ````
 ## Advanced sensor tuning: change I2C address
 I2C address is used to communicate with the sensor. Many sensors have I2C address hardcoded, but this sensor supports three different I2C addresses.
-By defult this TSL2561 sensor uses I2C address 0x39. You can change the address by connecting sensor pin named Addr to +3v or to ground. 
+By defult this TSL2561 sensor uses I2C address 0x39. You can change the address by connecting the sensor pin named Addr to +3v or to ground. 
 
 1. How to set I2C address to 0x39
-   1. Leave sensor pin addr open
-   2. Create new sensor object without any parameter
+   1. Leave the sensor pin addr open
+   2. Create a new sensor object without any parameters
 ````C#
         private TSL2561 TSL2561Sensor = new TSL2561();
 ````
 2. How to set I2C address to 0x29
-   1. Connect sensor pin addr to ground
-   2. Use parameter TSL2561.I2C_ADDR_0_0x29 when creating new sensor object
+   1. Connect the sensor pin addr to ground
+   2. Use parameter TSL2561.I2C_ADDR_0_0x29 when creating a new sensor object
 ````C#
         private TSL2561 TSL2561Sensor = new TSL2561(TSL2561.I2C_ADDR_0_0x29);
 ````
 3. How to set I2C address to 0x49
-   1. Connect sensor pin addr to voltage +3V
-   2. Use parameter TSL2561.I2C_ADDR_0_0x49 when creating new sensor object
+   1. Connect the sensor pin addr to voltage +3V
+   2. Use parameter TSL2561.I2C_ADDR_0_0x49 when creating a new sensor object
 ````C#
         private TSL2561 TSL2561Sensor = new TSL2561(TSL2561.I2C_ADDR_1_0x49);
 ````
