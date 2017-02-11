@@ -8,7 +8,7 @@ The TSL2561 luminosity sensor is an advanced digital light sensor, ideal for use
 This sensor is precise, allowing for exact lux calculations and can be configured for 
 different gain/timing ranges to detect light ranges from up to 0.1 - 40,000+ Lux on the fly. 
 
-![image](https://cloud.githubusercontent.com/assets/13704023/22796235/531f5dec-ef02-11e6-929a-beb24afb5d74.png)
+![image](https://cloud.githubusercontent.com/assets/13704023/22854871/cdecee4a-f07e-11e6-918b-b78cb429d415.png)
 
 ## How to connect this sensor into Raspberry PI?
 To connect this sensor to Raspberry PI you need 4 wires. Two of the wires used for voltage Vin (+3V from Raspberry) and ground GND and remaining two are used for data. 
