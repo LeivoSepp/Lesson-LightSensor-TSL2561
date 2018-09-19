@@ -88,7 +88,7 @@ TSL2561.INTEGRATIONTIME_101MS
 TSL2561.INTEGRATIONTIME_402MS
 ````
 2. Gain: You can change the gain on the fly, to adapt to brighter/dimmer light situations. 
-   1. No gain (false): use in bright light
+   1. No gain (false): use in bright light (default)
    2. 16x Gain (true): use in dim light
 
 Tu use timing and gain, you need to write one additional line of code. First parameter for method SetTiming is gain (true/false) and second parameter is timing. 
