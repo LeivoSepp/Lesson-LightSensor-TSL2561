@@ -80,7 +80,7 @@ This sensor supports three different timing and two gain options.
 Changing the integration time gives you a longer time over which to sense light. Longer timelines are slower, but are good in very low light situtations!
 This sensor has three parameters for timing. 
    1. 13ms the shortest measure time, use in bright light
-   2. 101ms average measure time, use in medium light
+   2. 101ms average measure time, use in medium light (default)
    3. 402ms long measure time, use in dim light
 ````C#
 TSL2561.INTEGRATIONTIME_13MS
@@ -111,6 +111,7 @@ By defult this TSL2561 sensor uses I2C address 0x39. You can change the address 
 1. How to set I2C address to 0x39
    1. Leave the sensor pin addr open
    2. Create a new sensor object without any parameters
+   3. This is default I2C address
 ````C#
         private TSL2561 TSL2561Sensor = new TSL2561();
 ````
